@@ -8,12 +8,10 @@ file(MAKE_DIRECTORY ${generated_dir})
 include_directories(${generated_dir} ${CMAKE_SOURCE_DIR})
 message("** generated_dir............: ${generated_dir}")
 message("** source dir............: ${CMAKE_SOURCE_DIR}")
-add_custom_command(
-        OUTPUT ${generated_dir}/log_msg_generated.h
-        COMMAND flatc --cpp --scoped-enums --grpc ${CMAKE_SOURCE_DIR}/log_msg.fbs
+execute_process(COMMAND flatc --cpp --scoped-enums --grpc ${CMAKE_SOURCE_DIR}/log_msg.fbs
         WORKING_DIRECTORY ${generated_dir}
-        DEPENDS ${CMAKE_SOURCE_DIR}/log_msg.fbs
-)
+        RESULT_VARIABLE FLATC_RES)
+
 set_source_files_properties(${generated_dir}/log_msg_buf.h
         PROPERTIES GENERATED TRUE)
 
