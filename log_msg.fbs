@@ -1,0 +1,31 @@
+// example IDL file
+
+namespace Logger;
+
+file_identifier "LMSG";
+
+enum LogLevel : byte { INFO = 0, DEBUG = 5, TRACE, INSANE }
+
+table LogId {
+    id:long = 0;
+}
+
+table LogEntry {
+    lvl:LogLevel = INFO;
+    code_point:string;
+    log_msg:string;
+    srvc_name:string;
+    host:string;
+}
+
+table LogSendResponse {
+    success:bool = false;
+    msg:string;
+}
+
+rpc_service LogComs {
+  Send(LogEntry):LogSendResponse;
+  Retrieve(LogId):LogEntry;
+}
+
+root_type LogEntry;
