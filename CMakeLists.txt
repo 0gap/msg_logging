@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.16)
 project(msg_logging)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -59,5 +59,22 @@ add_executable(try_pub_sub_zmq_proxy
 target_include_directories(try_pub_sub_zmq_proxy PRIVATE lib)
 target_link_libraries(try_pub_sub_zmq_proxy ${CONAN_LIBS} flat_msg zmq_components)
 
+add_executable(try_pull_sub_zmq_proxy
+        pull_sub_zmq_proxy/pull_sub_zmq_proxy_main.cc)
+target_include_directories(try_pull_sub_zmq_proxy PRIVATE lib)
+target_link_libraries(try_pull_sub_zmq_proxy ${CONAN_LIBS} flat_msg zmq_components)
+
+add_executable(benchmarks bench/benchmarks.cc)
+target_include_directories(benchmarks BEFORE PRIVATE lib)
+target_link_libraries(benchmarks ${CONAN_LIBS} flat_msg)
+
+add_executable(grpc_benchmarks bench/grpc_bench.cc)
+target_include_directories(grpc_benchmarks BEFORE PRIVATE lib)
+target_link_libraries(grpc_benchmarks ${CONAN_LIBS} flat_msg)
+
+add_executable(try_grpc_server
+        grpc_server/grpc_server_main.cc)
+target_include_directories(try_grpc_server BEFORE PRIVATE lib)
+target_link_libraries(try_grpc_server ${CONAN_LIBS} flat_msg)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/)
