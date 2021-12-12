@@ -36,6 +36,14 @@ add_library(flat_msg OBJECT lib/LogEntrySerializer.cc lib/LogEntrySerializer.h
         )
 add_dependencies(flat_msg flat_compiled_headers)
 
+add_library(zmq_components OBJECT
+        lib/publisher.h
+        lib/subscriber.h
+        lib/pub_sub_proxy.h
+        lib/binding.h)
+target_include_directories(zmq_components PRIVATE lib)
+set_target_properties(zmq_components PROPERTIES LINKER_LANGUAGE CXX)
+
 add_executable(msg_logging main.cpp)
 add_dependencies(msg_logging flat_msg)
 target_include_directories(msg_logging BEFORE PRIVATE lib)
@@ -45,5 +53,11 @@ add_executable(zmq_server
         zmq_consumer/zmq_log_server.cc
         zmq_consumer/zmq_consumer.cc)
 target_link_libraries(zmq_server ${CONAN_LIBS} flat_msg)
+
+add_executable(try_pub_sub_zmq_proxy
+        pub_sub_zmq_proxy/pub_sub_zmq_proxy_main.cc)
+target_include_directories(try_pub_sub_zmq_proxy PRIVATE lib)
+target_link_libraries(try_pub_sub_zmq_proxy ${CONAN_LIBS} flat_msg zmq_components)
+
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/)
