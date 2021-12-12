@@ -77,4 +77,8 @@ add_executable(try_grpc_server
 target_include_directories(try_grpc_server BEFORE PRIVATE lib)
 target_link_libraries(try_grpc_server ${CONAN_LIBS} flat_msg)
 
+add_executable(load_balance_benchmarks bench/load_balance_bench.cc)
+target_include_directories(load_balance_benchmarks BEFORE PRIVATE lib)
+target_link_libraries(load_balance_benchmarks ${CONAN_LIBS} flat_msg)
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/)
