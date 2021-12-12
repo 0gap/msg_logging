@@ -5,7 +5,7 @@ build-debug:
 	mkdir -p cmake-build-debug/generated
 	cd cmake-build-debug && conan install .. && cd generated && flatc --cpp --scoped-enums --grpc ../../log_msg.fbs
 	cd cmake-build-debug && cmake -DCMAKE_BUILD_TYPE=Debug ..
-	cd cmake-build-debug && cmake --build . -- -j 4
+	cd cmake-build-debug/bin && conan info ../.. --graph=dependency_graph.html
 
 build-release:
 	rm -rf cmake-build-release
@@ -13,6 +13,7 @@ build-release:
 	cd cmake-build-release && conan install .. && cd generated && flatc --cpp --scoped-enums --grpc ../../log_msg.fbs
 	cd cmake-build-release && cmake -DCMAKE_BUILD_TYPE=Release ..
 	cd cmake-build-release && cmake --build . -- -j 4
+	cd cmake-build-release/bin && conan info ../.. --graph=dependency_graph.html
 
 benchmarks: build-release
 	docker-compose -f ./load_balance/nginx_config/nginx-docker-compose.yml down

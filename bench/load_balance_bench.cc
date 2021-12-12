@@ -32,7 +32,7 @@ zmq::socket_t sock1(ctx, zmq::socket_type::push);
 zmq::socket_t sock2(ctx, zmq::socket_type::push);
 zmq::socket_t sock3(ctx, zmq::socket_type::push);
 uint64_t msg_count{ 0 };
-static void runzmq(benchmark::State &state)
+static void bench_simple_zmq_pull_server(benchmark::State &state)
 {
   for (auto _ : state)
   {
@@ -67,7 +67,7 @@ static void runzmq(benchmark::State &state)
   }
 }
 
-BENCHMARK(bench_pull_sub_proxy)->Iterations(150000);
+BENCHMARK(bench_simple_zmq_pull_server)->Iterations(150000);
 
 // You need to have nginx load balance compose
 // Messages will be load balanced between all grpc servers
