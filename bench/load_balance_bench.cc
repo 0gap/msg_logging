@@ -25,7 +25,7 @@ static void log_creation(benchmark::State &state)
     new_log2.export_fb();
   }
 }
-BENCHMARK(log_creation)->Iterations(150000);
+BENCHMARK(log_creation)->Iterations(20000);
 
 zmq::context_t ctx(1);
 zmq::socket_t sock1(ctx, zmq::socket_type::push);
@@ -67,7 +67,7 @@ static void bench_simple_zmq_pull_server(benchmark::State &state)
   }
 }
 
-BENCHMARK(bench_simple_zmq_pull_server)->Iterations(150000);
+BENCHMARK(bench_simple_zmq_pull_server)->Iterations(2000000);
 
 // You need to have nginx load balance compose
 // Messages will be load balanced between all grpc servers
@@ -94,7 +94,7 @@ static void rungrpc(benchmark::State &state)
                      "hello from msg "+ std::to_string(grpc_lb_sent), "this service", "hostname");
   }
 }
-BENCHMARK(rungrpc)->Iterations(150000);
+BENCHMARK(rungrpc)->Iterations(3000);
 
 // Run the benchmark
 
