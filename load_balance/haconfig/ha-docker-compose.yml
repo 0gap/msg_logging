@@ -1,0 +1,50 @@
+version: '3'
+services:
+  ha-proxy:
+    image: haproxytech/haproxy-alpine:2.4
+    container_name: haproxy
+    ports:
+      - "12404:81"
+      - "8404:8404"
+    volumes:
+      - ./conf:/usr/local/etc/haproxy:ro
+    networks:
+      - zmq_ingressor
+    depends_on:
+      - zmq_consumer_1
+      - zmq_consumer_2
+      - zmq_consumer_3
+
+  zmq_consumer_1:
+    image: ubuntu:20.04
+    container_name: zmq_consumer_1
+    volumes:
+      - ../../cmake-build-release/bin:/home/zero/bin
+    command:
+      ["/bin/bash", "-c", "/home/zero/bin/zmq_server"]
+    networks:
+      - zmq_ingressor
+
+  zmq_consumer_2:
+    image: ubuntu:20.04
+    container_name: zmq_consumer_2
+    volumes:
+      - ../../cmake-build-release/bin:/home/zero/bin
+    command:
+      ["/bin/bash", "-c", "/home/zero/bin/zmq_server"]
+    networks:
+      - zmq_ingressor
+
+  zmq_consumer_3:
+    image: ubuntu:20.04
+    container_name: zmq_consumer_3
+    volumes:
+      - ../../cmake-build-release/bin:/home/zero/bin
+    command:
+      ["/bin/bash", "-c", "/home/zero/bin/zmq_server"]
+    networks:
+      - zmq_ingressor
+
+
+networks:
+  zmq_ingressor:

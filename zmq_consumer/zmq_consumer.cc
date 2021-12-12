@@ -37,17 +37,6 @@ namespace msg_logging::zmq_logger {
         void Run() {
             LOG(INFO) << "Starting ZMQ on " << address_;
 
-//            auto is_first = [](zmq::message_t &header) {
-//                // sometimes we drop a header message (maybe on a reconnect) and
-//                // so the stream gets out of sync.  We can re-sync it b/c only
-//                // the header message has the more bit set
-//                if (header.more())
-//                    return true;
-//                LOG(WARNING) << "ABA message correction";
-//                ++messages_dropped;
-//                return false;
-//            };
-
             zmq::context_t context(1);
             zmq::socket_t socket(context, ZMQ_PULL);
             std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -59,10 +48,9 @@ namespace msg_logging::zmq_logger {
             zmq::message_t body;
             while (running_) {
 
-                if (/*socket.recv(header) && is_first(header) && */socket.recv(body)) {
+                if (socket.recv(body)) {
                     if (handle_message(header, body)) {
                         ++messages_accepted;
-//                        LOG(INFO) << "Messages accepted " << messages_accepted;
                     } else {
                         ++messages_dropped;
                         LOG(INFO) << "Messages dropped" << messages_dropped;
@@ -113,7 +101,6 @@ namespace msg_logging::zmq_logger {
     ZmqConsumer::~ZmqConsumer() = default;
 
     void ZmqConsumer::Add(MessageHandler &p) {
-        //  CHECK(!impl_) << "Already started";
         receivers_.push_back(&p);
     }
 

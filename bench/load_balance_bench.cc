@@ -27,24 +27,10 @@ static void log_creation(benchmark::State &state)
 }
 BENCHMARK(log_creation)->Iterations(150000);
 
-static void log_in_file(benchmark::State &state)
-{
-
-  for (auto _ : state)
-  {
-    LOG(INFO) << __CODE_POINT__ << "hello"
-              << "this servec"
-              << "hostname";
-    LOG(INFO) << __CODE_POINT__ << "hello from msg2"
-              << "this service"
-              << "hostname";
-  }
-}
-
-BENCHMARK(log_in_file)->Iterations(150000);
-
 zmq::context_t ctx(1);
 zmq::socket_t sock1(ctx, zmq::socket_type::push);
+zmq::socket_t sock2(ctx, zmq::socket_type::push);
+zmq::socket_t sock3(ctx, zmq::socket_type::push);
 uint64_t msg_count{ 0 };
 static void runzmq(benchmark::State &state)
 {
@@ -64,19 +50,31 @@ static void runzmq(benchmark::State &state)
                                 "hostname");
     new_log2.export_fb();
 
+    ++msg_count;
+    LogEntrySerializer new_log3(Logger::LogLevel::INSANE, __CODE_POINT__,
+                                "hello from msg " + std::to_string(msg_count),
+                                "this "
+                                "service",
+                                "hostname");
+    new_log3.export_fb();
+
     sock1.send(zmq::const_buffer(zmq::buffer(new_log.get_data())),
                zmq::send_flags::dontwait);
-    sock1.send(zmq::const_buffer(zmq::buffer(new_log2.get_data())),
+    sock2.send(zmq::const_buffer(zmq::buffer(new_log2.get_data())),
+               zmq::send_flags::dontwait);
+    sock3.send(zmq::const_buffer(zmq::buffer(new_log3.get_data())),
                zmq::send_flags::dontwait);
   }
 }
 
 BENCHMARK(runzmq)->Iterations(150000);
 
-// You need to have grpc_server running
-static void rungrpc2(benchmark::State &state)
+// You need to have nginx load balance compose
+// Messages will be load balanced between all grpc servers
+uint64_t grpc_lb_sent{0};
+static void rungrpc(benchmark::State &state)
 {
-  std::string server_address("localhost:50051");
+  std::string server_address("localhost:50052");
 
   auto channel = grpc::CreateChannel(server_address,
                                      grpc::InsecureChannelCredentials());
@@ -84,35 +82,58 @@ static void rungrpc2(benchmark::State &state)
 
   for (auto _ : state)
   {
-    LogEntrySerializer new_log(Logger::LogLevel::DEBUG, __CODE_POINT__, "hello",
-                               "this servec", "hostname");
-    new_log.export_fb();
-    LogEntrySerializer new_log2(Logger::LogLevel::INSANE, __CODE_POINT__,
-                                "hello from msg2", "this service", "hostname");
-    new_log2.export_fb();
-    greeter.SendLog(new_log);
-    greeter.SendLog(new_log2);
+    ++grpc_lb_sent;
+    greeter.send_log(Logger::LogLevel::INSANE, __CODE_POINT__,
+                     "hello from msg "+ std::to_string(grpc_lb_sent), "this service",
+                     "hostname");
+    ++grpc_lb_sent;
+    greeter.send_log(Logger::LogLevel::INSANE, __CODE_POINT__,
+                     "hello from msg "+ std::to_string(grpc_lb_sent), "this service", "hostname");
+    ++grpc_lb_sent;
+    greeter.send_log(Logger::LogLevel::INSANE, __CODE_POINT__,
+                     "hello from msg "+ std::to_string(grpc_lb_sent), "this service", "hostname");
   }
 }
-BENCHMARK(rungrpc2)->Iterations(150000);
+BENCHMARK(rungrpc)->Iterations(150000);
 
 // Run the benchmark
+
+void setup_socks(){
+
+  // Need to have the ha load balancer running first
+  sock1.connect(
+          "tcp://127.0.0.1:12404");
+  sock1.set(zmq::sockopt::immediate, 1);
+  sock1.set(zmq::sockopt::sndhwm, 1024);
+  sock1.set(zmq::sockopt::reconnect_ivl_max, 2500);
+  sock1.set(zmq::sockopt::linger, 500);
+
+  sock2.connect(
+          "tcp://127.0.0.1:12404");
+  sock2.set(zmq::sockopt::immediate, 1);
+  sock2.set(zmq::sockopt::sndhwm, 1024);
+  sock2.set(zmq::sockopt::reconnect_ivl_max, 2500);
+  sock2.set(zmq::sockopt::linger, 500);
+
+  sock3.connect(
+          "tcp://127.0.0.1:12404");
+  sock3.set(zmq::sockopt::immediate, 1);
+  sock3.set(zmq::sockopt::sndhwm, 1024);
+  sock3.set(zmq::sockopt::reconnect_ivl_max, 2500);
+  sock3.set(zmq::sockopt::linger, 500);
+}
+
 int main(int argc, char **argv)
 {
   FLAGS_log_dir = ".";
   FLAGS_logbufsecs = 0;
   google::InitGoogleLogging("benchmark.log");
-  // Need to have try_pull_sub_zmq_proxy running first
-  sock1.connect(
-          "tcp://127.0.0.1:19999");// "ipc:///var/log/pull_sub_proxy/0"); //
-  sock1.set(zmq::sockopt::immediate, 1);
-  sock1.set(zmq::sockopt::sndhwm, 1024);
-  sock1.set(zmq::sockopt::reconnect_ivl_max, 2500);
-  sock1.set(zmq::sockopt::linger, 500);
+  setup_socks();
   ::benchmark::Initialize(&argc, argv);
   if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1;
   ::benchmark::RunSpecifiedBenchmarks();
   std::cout << "msgs sent from zmq: " << msg_count << std::endl;
+  std::cout << "msgs sent to load balancer: " << grpc_lb_sent << std::endl;
   ctx.shutdown();
   std::cout << "zmq ctx shutdown\n";
   sock1.close();
