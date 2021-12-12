@@ -67,7 +67,7 @@ static void runzmq(benchmark::State &state)
   }
 }
 
-BENCHMARK(runzmq)->Iterations(150000);
+BENCHMARK(bench_pull_sub_proxy)->Iterations(150000);
 
 // You need to have nginx load balance compose
 // Messages will be load balanced between all grpc servers

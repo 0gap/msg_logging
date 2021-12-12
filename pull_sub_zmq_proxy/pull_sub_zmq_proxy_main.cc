@@ -14,12 +14,6 @@
 
 int main(int argc, char** argv)
 {
-//  FLAGS_log_dir = "/var/log/pull_sub_proxy";
-//  FLAGS_logbufsecs = 0;
-//  gflags::ParseCommandLineFlags(&argc, &argv, true);
-//  google::InstallFailureSignalHandler();
-//  google::InitGoogleLogging("pull_sub_proxy");
-
   zmq::context_t ctx(1);
   PullSubProxy proxy(std::move(Binding("tcp://127.0.0.1:19999")),
                      Binding("tcp://127.0.0.1:38888"),

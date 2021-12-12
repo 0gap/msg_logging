@@ -46,7 +46,7 @@ BENCHMARK(log_in_file)->Iterations(150000);
 zmq::context_t ctx(1);
 zmq::socket_t sock1(ctx, zmq::socket_type::push);
 uint64_t msg_count{ 0 };
-static void runzmq(benchmark::State &state)
+static void bench_pull_sub_proxy(benchmark::State &state)
 {
   for (auto _ : state)
   {
@@ -71,7 +71,7 @@ static void runzmq(benchmark::State &state)
   }
 }
 
-BENCHMARK(runzmq)->Iterations(150000);
+BENCHMARK(bench_pull_sub_proxy)->Iterations(150000);
 
 // You need to have grpc_server running
 static void rungrpc2(benchmark::State &state)
