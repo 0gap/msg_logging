@@ -17,6 +17,8 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y flatbuffers-compiler
+        pip install conan
+        cmake --version
     - name: make flatbuffer generated files
       run: make flat
     - name: make release
