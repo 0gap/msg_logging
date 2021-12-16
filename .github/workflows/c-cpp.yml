@@ -13,8 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: configure
-      run: ./configure
+#     - name: configure
+#       run: ./configure
     - name: make flatbuffer generated files
       run: make flat
     - name: make release
