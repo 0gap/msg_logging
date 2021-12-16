@@ -18,7 +18,7 @@ build-release:
 	mkdir -p cmake-build-release
 	cd cmake-build-release && conan install -pr release ..
 	cd cmake-build-release && cmake -DCMAKE_BUILD_TYPE=Release ..
-	cd cmake-build-release && cmake --build . -- -j 4
+	cd cmake-build-release && cmake --build .
 	cd cmake-build-release/bin && conan info ../.. --graph=dependency_graph.html
 
 lb-down:
