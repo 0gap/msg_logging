@@ -13,8 +13,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-#     - name: configure
-#       run: ./configure
+    - name: configure
+      run: |
+        sudo apt update
+        sudo apt install -y flatbuffers-compiler
     - name: make flatbuffer generated files
       run: make flat
     - name: make release
