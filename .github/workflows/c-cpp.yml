@@ -27,14 +27,6 @@ jobs:
         conan profile update settings.compiler.version=9 ~/.conan/profiles/release
         conan profile update settings.compiler.libcxx=libstdc++11 ~/.conan/profiles/release
         conan profile update settings.build_type=Debug ~/.conan/profiles/release
-        conan profile update settings.os=Linux default
-        conan profile update settings.os_build=Linux default
-        conan profile update settings.arch=x86_64 default
-        conan profile update settings.arch_build=x86_64 default
-        conan profile update settings.compiler=gcc default
-        conan profile update settings.compiler.version=9 default
-        conan profile update settings.compiler.libcxx=libstdc++11 default
-        conan profile update settings.build_type=Debug default
     - name: make flatbuffer generated files
       run: make flat
     - name: make release
